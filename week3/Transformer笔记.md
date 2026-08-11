@@ -94,9 +94,9 @@ Self-Attention 本身没有天然的顺序结构。下面两个句子包含相�
 
 位置编码用于告诉模型每个 Token 在序列中的位置。Transformer 的输入通常是：
 
-$$
-X=E_{token}+P_{position}
-$$
+```text
+X = E_token + P_position
+```
 
 可以理解为：
 
@@ -113,19 +113,19 @@ Position Encoding：这个Token在哪里
 
 原始 Transformer 使用固定的正弦余弦位置编码：
 
-$$
-PE(pos,2i)=\sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)
-$$
+```text
+PE(pos, 2i) = sin(pos / 10000^(2i / d_model))
+```
 
-$$
-PE(pos,2i+1)=\cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)
-$$
+```text
+PE(pos, 2i + 1) = cos(pos / 10000^(2i / d_model))
+```
 
 其中：
 
-- $pos$ 表示 Token 的位置；
-- $i$ 表示位置向量中的维度；
-- $d_{model}$ 表示模型特征维度；
+- `pos` 表示 Token 的位置；
+- `i` 表示位置向量中的维度；
+- `d_model` 表示模型特征维度；
 - 偶数维使用正弦函数；
 - 奇数维使用余弦函数。
 
@@ -224,19 +224,19 @@ V：搜索结果页面中的实际内容
 
 Q 与 K 决定应该关注谁，V 决定关注后获取什么信息。
 
-Q、K、V 都由同一个输入 $X$ 经过不同的可训练线性变换得到：
+Q、K、V 都由同一个输入 `X` 经过不同的可训练线性变换得到：
 
-$$
-Q=XW_Q
-$$
+```text
+Q = X @ W_Q
+```
 
-$$
-K=XW_K
-$$
+```text
+K = X @ W_K
+```
 
-$$
-V=XW_V
-$$
+```text
+V = X @ W_V
+```
 
 ```python
 batch_size = 1
@@ -269,24 +269,19 @@ print("V形状：", value.shape)
 
 核心公式为：
 
-$$
-A(Q,K,V)
-=
-softmax
-\left(
-\frac{QK^T}{\sqrt{d_k}}
-\right)V
-$$
+```text
+Attention(Q, K, V) = softmax((Q @ K^T) / sqrt(d_k)) @ V
+```
 
 它可以拆成四步。
 
 ### 6.1 Q 与 K 点积
 
-$$
-QK^T
-$$
+```text
+Q @ K^T
+```
 
-点积用于计算每个 Query 与所有 Key 的匹配程度。假设序列长度为 $T$，注意力分数矩阵形状就是：
+点积用于计算每个 Query 与所有 Key 的匹配程度。假设序列长度为 `T`，注意力分数矩阵形状就是：
 
 ```text
 [batch_size, T, T]
@@ -296,21 +291,19 @@ $$
 
 ### 6.2 缩放
 
-$$
-\frac{QK^T}{\sqrt{d_k}}
-$$
+```text
+(Q @ K^T) / sqrt(d_k)
+```
 
-当向量维度较高时，点积绝对值容易变大，使 Softmax 过度饱和，影响梯度传播。除以 $\sqrt{d_k}$ 可以让分数尺度更加稳定。
+当向量维度较高时，点积绝对值容易变大，使 Softmax 过度饱和，影响梯度传播。除以 `sqrt(d_k)` 可以让分数尺度更加稳定。
 
 ### 6.3 Softmax
 
 Softmax 把任意实数分数转换成非负且总和为 1 的权重：
 
-$$
-softmax(z_i)
-=
-\frac{e^{z_i}}{\sum_j e^{z_j}}
-$$
+```text
+softmax(z_i) = exp(z_i) / sum_j(exp(z_j))
+```
 
 例如：
 
@@ -323,15 +316,15 @@ Softmax： [0.25, 0.23, 0.52]
 
 ### 6.4 对 V 加权求和
 
-$$
-AV
-$$
+```text
+AttentionWeights @ V
+```
 
 例如：
 
-$$
-0.25V_1+0.23V_2+0.52V_3
-$$
+```text
+0.25 * V_1 + 0.23 * V_2 + 0.52 * V_3
+```
 
 输出是所有 Value 向量按照注意力权重形成的加权组合。
 
@@ -407,25 +400,15 @@ Softmax 不适合互相独立的多标签问题。例如一张图片可以同时
 
 每个头的计算为：
 
-$$
-head_i
-=
-A
-\left(
-QW_i^Q,
-KW_i^K,
-VW_i^V
-\right)
-$$
+```text
+head_i = Attention(Q @ W_i^Q, K @ W_i^K, V @ W_i^V)
+```
 
 所有头的输出拼接后再进行线性变换：
 
-$$
-MultiHead(Q,K,V)
-=
-Concat
-(head_1,\ldots,head_h)W^O
-$$
+```text
+MultiHead(Q, K, V) = Concat(head_1, ..., head_h) @ W_O
+```
 
 假设：
 
@@ -436,15 +419,15 @@ num_heads = 8
 
 每个头的维度为：
 
-$$
-d_{head}=\frac{512}{8}=64
-$$
+```text
+d_head = 512 / 8 = 64
+```
 
 因此必须满足：
 
-$$
-d_{model}\bmod h=0
-$$
+```text
+d_model % h = 0
+```
 
 ### 8.1 为什么分开计算反而有效
 
@@ -455,7 +438,7 @@ $$
 1. 每个头拥有自己的投影子空间；
 2. 每个头独立产生一套 Softmax 注意力权重；
 3. 不同关系可以在拼接前分别保留；
-4. 拼接后的输出经过 $W^O$ 再次融合；
+4. 拼接后的输出经过 `W_O` 再次融合；
 5. 在总维度不变的情况下，模型获得多种并行的信息读取方式。
 
 例如处理“吃”时：
@@ -645,11 +628,9 @@ print(masked_weights[0, 0])
 
 典型结构为：
 
-$$
-FFN(x)
-=
-GELU(xW_1+b_1)W_2+b_2
-$$
+```text
+FFN(x) = GELU(x @ W_1 + b_1) @ W_2 + b_2
+```
 
 数据流通常是：
 
@@ -699,9 +680,9 @@ FFN：对每个Token内部的特征进行加工
 
 残差连接把模块输入直接加回输出：
 
-$$
-Y=X+F(X)
-$$
+```text
+Y = X + F(X)
+```
 
 它可以：
 
@@ -735,13 +716,13 @@ dropout = nn.Dropout(0.1)
 
 下面实现一个 Pre-LN Transformer Block：
 
-$$
-X'=X+A(LN(X))
-$$
+```text
+X' = X + Attention(LayerNorm(X))
+```
 
-$$
-X_{next}=X'+FFN(LN(X'))
-$$
+```text
+X_next = X' + FFN(LayerNorm(X'))
+```
 
 ```python
 class TransformerBlock(nn.Module):
@@ -915,53 +896,43 @@ Decoder-only 模型只堆叠带因果掩码的 Transformer Block，根据前文�
 
 ### 输入表示
 
-$$
-X=E_{token}+P_{position}
-$$
+```text
+X = E_token + P_position
+```
 
 ### Q、K、V
 
-$$
-Q=XW_Q,\quad K=XW_K,\quad V=XW_V
-$$
+```text
+Q = X @ W_Q, K = X @ W_K, V = X @ W_V
+```
 
 ### Scaled Dot-Product Attention
 
-$$
-A(Q,K,V)
-=
-softmax
-\left(
-\frac{QK^T}{\sqrt{d_k}}
-\right)V
-$$
+```text
+Attention(Q, K, V) = softmax((Q @ K^T) / sqrt(d_k)) @ V
+```
 
 ### Multi-Head Attention
 
-$$
-MultiHead(Q,K,V)
-=
-Concat
-(head_1,\ldots,head_h)W^O
-$$
+```text
+MultiHead(Q, K, V) = Concat(head_1, ..., head_h) @ W_O
+```
 
 ### Feed Forward Network
 
-$$
-FFN(x)
-=
-GELU(xW_1+b_1)W_2+b_2
-$$
+```text
+FFN(x) = GELU(x @ W_1 + b_1) @ W_2 + b_2
+```
 
 ### Pre-LN Transformer Block
 
-$$
-X'=X+A(LN(X))
-$$
+```text
+X' = X + Attention(LayerNorm(X))
+```
 
-$$
-X_{next}=X'+FFN(LN(X'))
-$$
+```text
+X_next = X' + FFN(LayerNorm(X'))
+```
 
 ---
 
