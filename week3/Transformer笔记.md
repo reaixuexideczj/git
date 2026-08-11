@@ -95,7 +95,7 @@ Self-Attention 本身没有天然的顺序结构。下面两个句子包含相�
 位置编码用于告诉模型每个 Token 在序列中的位置。Transformer 的输入通常是：
 
 $$
-X=\mathrm{TokenEmbedding}+\mathrm{PositionEncoding}
+X=E_{token}+P_{position}
 $$
 
 可以理解为：
@@ -270,9 +270,9 @@ print("V形状：", value.shape)
 核心公式为：
 
 $$
-\mathrm{Attention}(Q,K,V)
+A(Q,K,V)
 =
-\mathrm{softmax}
+softmax
 \left(
 \frac{QK^T}{\sqrt{d_k}}
 \right)V
@@ -307,7 +307,7 @@ $$
 Softmax 把任意实数分数转换成非负且总和为 1 的权重：
 
 $$
-\mathrm{softmax}(z_i)
+softmax(z_i)
 =
 \frac{e^{z_i}}{\sum_j e^{z_j}}
 $$
@@ -324,7 +324,7 @@ Softmax： [0.25, 0.23, 0.52]
 ### 6.4 对 V 加权求和
 
 $$
-\mathrm{AttentionWeights}V
+AV
 $$
 
 例如：
@@ -408,9 +408,9 @@ Softmax 不适合互相独立的多标签问题。例如一张图片可以同时
 每个头的计算为：
 
 $$
-\mathrm{head}_i
+head_i
 =
-\mathrm{Attention}
+A
 \left(
 QW_i^Q,
 KW_i^K,
@@ -421,10 +421,10 @@ $$
 所有头的输出拼接后再进行线性变换：
 
 $$
-\mathrm{MultiHead}(Q,K,V)
+MultiHead(Q,K,V)
 =
-\mathrm{Concat}
-(\mathrm{head}_1,\ldots,\mathrm{head}_h)W^O
+Concat
+(head_1,\ldots,head_h)W^O
 $$
 
 假设：
@@ -443,7 +443,7 @@ $$
 因此必须满足：
 
 $$
-d_{model}\bmod num\_heads=0
+d_{model}\bmod h=0
 $$
 
 ### 8.1 为什么分开计算反而有效
@@ -646,9 +646,9 @@ print(masked_weights[0, 0])
 典型结构为：
 
 $$
-\mathrm{FFN}(x)
+FFN(x)
 =
-\mathrm{GELU}(xW_1+b_1)W_2+b_2
+GELU(xW_1+b_1)W_2+b_2
 $$
 
 数据流通常是：
@@ -736,11 +736,11 @@ dropout = nn.Dropout(0.1)
 下面实现一个 Pre-LN Transformer Block：
 
 $$
-X'=X+\mathrm{Attention}(\mathrm{LN}(X))
+X'=X+A(LN(X))
 $$
 
 $$
-X_{next}=X'+\mathrm{FFN}(\mathrm{LN}(X'))
+X_{next}=X'+FFN(LN(X'))
 $$
 
 ```python
@@ -916,7 +916,7 @@ Decoder-only 模型只堆叠带因果掩码的 Transformer Block，根据前文�
 ### 输入表示
 
 $$
-X=\mathrm{TokenEmbedding}+\mathrm{PositionEncoding}
+X=E_{token}+P_{position}
 $$
 
 ### Q、K、V
@@ -928,9 +928,9 @@ $$
 ### Scaled Dot-Product Attention
 
 $$
-\mathrm{Attention}(Q,K,V)
+A(Q,K,V)
 =
-\mathrm{softmax}
+softmax
 \left(
 \frac{QK^T}{\sqrt{d_k}}
 \right)V
@@ -939,28 +939,28 @@ $$
 ### Multi-Head Attention
 
 $$
-\mathrm{MultiHead}(Q,K,V)
+MultiHead(Q,K,V)
 =
-\mathrm{Concat}
-(\mathrm{head}_1,\ldots,\mathrm{head}_h)W^O
+Concat
+(head_1,\ldots,head_h)W^O
 $$
 
 ### Feed Forward Network
 
 $$
-\mathrm{FFN}(x)
+FFN(x)
 =
-\mathrm{GELU}(xW_1+b_1)W_2+b_2
+GELU(xW_1+b_1)W_2+b_2
 $$
 
 ### Pre-LN Transformer Block
 
 $$
-X'=X+\mathrm{Attention}(\mathrm{LN}(X))
+X'=X+A(LN(X))
 $$
 
 $$
-X_{next}=X'+\mathrm{FFN}(\mathrm{LN}(X'))
+X_{next}=X'+FFN(LN(X'))
 $$
 
 ---
