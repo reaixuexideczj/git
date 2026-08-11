@@ -95,7 +95,7 @@ Self-Attention 本身没有天然的顺序结构。下面两个句子包含相�
 位置编码用于告诉模型每个 Token 在序列中的位置。Transformer 的输入通常是：
 
 $$
-X=\operatorname{TokenEmbedding}+\operatorname{PositionEncoding}
+X=\mathrm{TokenEmbedding}+\mathrm{PositionEncoding}
 $$
 
 可以理解为：
@@ -270,9 +270,9 @@ print("V形状：", value.shape)
 核心公式为：
 
 $$
-\operatorname{Attention}(Q,K,V)
+\mathrm{Attention}(Q,K,V)
 =
-\operatorname{softmax}
+\mathrm{softmax}
 \left(
 \frac{QK^T}{\sqrt{d_k}}
 \right)V
@@ -307,7 +307,7 @@ $$
 Softmax 把任意实数分数转换成非负且总和为 1 的权重：
 
 $$
-\operatorname{softmax}(z_i)
+\mathrm{softmax}(z_i)
 =
 \frac{e^{z_i}}{\sum_j e^{z_j}}
 $$
@@ -324,7 +324,7 @@ Softmax： [0.25, 0.23, 0.52]
 ### 6.4 对 V 加权求和
 
 $$
-\operatorname{AttentionWeights}V
+\mathrm{AttentionWeights}V
 $$
 
 例如：
@@ -408,9 +408,9 @@ Softmax 不适合互相独立的多标签问题。例如一张图片可以同时
 每个头的计算为：
 
 $$
-\operatorname{head}_i
+\mathrm{head}_i
 =
-\operatorname{Attention}
+\mathrm{Attention}
 \left(
 QW_i^Q,
 KW_i^K,
@@ -421,10 +421,10 @@ $$
 所有头的输出拼接后再进行线性变换：
 
 $$
-\operatorname{MultiHead}(Q,K,V)
+\mathrm{MultiHead}(Q,K,V)
 =
-\operatorname{Concat}
-(\operatorname{head}_1,\ldots,\operatorname{head}_h)W^O
+\mathrm{Concat}
+(\mathrm{head}_1,\ldots,\mathrm{head}_h)W^O
 $$
 
 假设：
@@ -646,9 +646,9 @@ print(masked_weights[0, 0])
 典型结构为：
 
 $$
-\operatorname{FFN}(x)
+\mathrm{FFN}(x)
 =
-\operatorname{GELU}(xW_1+b_1)W_2+b_2
+\mathrm{GELU}(xW_1+b_1)W_2+b_2
 $$
 
 数据流通常是：
@@ -736,11 +736,11 @@ dropout = nn.Dropout(0.1)
 下面实现一个 Pre-LN Transformer Block：
 
 $$
-X'=X+\operatorname{Attention}(\operatorname{LN}(X))
+X'=X+\mathrm{Attention}(\mathrm{LN}(X))
 $$
 
 $$
-X_{next}=X'+\operatorname{FFN}(\operatorname{LN}(X'))
+X_{next}=X'+\mathrm{FFN}(\mathrm{LN}(X'))
 $$
 
 ```python
@@ -916,7 +916,7 @@ Decoder-only 模型只堆叠带因果掩码的 Transformer Block，根据前文�
 ### 输入表示
 
 $$
-X=\operatorname{TokenEmbedding}+\operatorname{PositionEncoding}
+X=\mathrm{TokenEmbedding}+\mathrm{PositionEncoding}
 $$
 
 ### Q、K、V
@@ -928,9 +928,9 @@ $$
 ### Scaled Dot-Product Attention
 
 $$
-\operatorname{Attention}(Q,K,V)
+\mathrm{Attention}(Q,K,V)
 =
-\operatorname{softmax}
+\mathrm{softmax}
 \left(
 \frac{QK^T}{\sqrt{d_k}}
 \right)V
@@ -939,28 +939,28 @@ $$
 ### Multi-Head Attention
 
 $$
-\operatorname{MultiHead}(Q,K,V)
+\mathrm{MultiHead}(Q,K,V)
 =
-\operatorname{Concat}
-(\operatorname{head}_1,\ldots,\operatorname{head}_h)W^O
+\mathrm{Concat}
+(\mathrm{head}_1,\ldots,\mathrm{head}_h)W^O
 $$
 
 ### Feed Forward Network
 
 $$
-\operatorname{FFN}(x)
+\mathrm{FFN}(x)
 =
-\operatorname{GELU}(xW_1+b_1)W_2+b_2
+\mathrm{GELU}(xW_1+b_1)W_2+b_2
 $$
 
 ### Pre-LN Transformer Block
 
 $$
-X'=X+\operatorname{Attention}(\operatorname{LN}(X))
+X'=X+\mathrm{Attention}(\mathrm{LN}(X))
 $$
 
 $$
-X_{next}=X'+\operatorname{FFN}(\operatorname{LN}(X'))
+X_{next}=X'+\mathrm{FFN}(\mathrm{LN}(X'))
 $$
 
 ---
@@ -976,4 +976,3 @@ Transformer 首先把 Token 转换成向量，并加入位置编码。Self-Atten
 一句话概括：
 
 > Transformer 通过位置编码保留顺序，通过多头注意力在 Token 之间传递信息，通过前馈网络加工特征，再利用残差连接和 LayerNorm 稳定地堆叠多层，最终获得包含上下文的 Token 表示。
-
